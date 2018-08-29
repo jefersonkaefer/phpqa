@@ -8,10 +8,7 @@ ENV BUILD_DEPS="autoconf file g++ gcc libc-dev make pkg-config re2c unzip"
 ENV LIB_DEPS="zlib1g-dev"
 ENV TOOL_DEPS="git graphviz"
 ENV PATH="$PATH:/tools/.composer/vendor/bin:/tools/QualityAnalyzer/bin:/tools/DesignPatternDetector/bin:/tools/EasyCodingStandard/bin"
-ENV TOOLS_JSON=/tools/tools.json
 
-COPY tools.json ${TOOLS_JSON}
-COPY tools.php /usr/local/bin/tools.php
 COPY --from=composer:1.7 /usr/bin/composer /usr/bin/composer
 
 RUN apt-get update && apt-get install -y --no-install-recommends $TOOL_DEPS $BUILD_DEPS $LIB_DEPS && rm -rf /var/lib/apt/lists/* \
@@ -20,8 +17,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends $TOOL_DEPS $BUI
  && echo "date.timezone=Europe/London" >> $PHP_INI_DIR/php.ini \
  && echo "memory_limit=-1" >> $PHP_INI_DIR/php.ini \
  && echo "phar.readonly=0" >> $PHP_INI_DIR/php.ini \
- && php /usr/local/bin/tools.php install \
+ && curl -Ls https://github.com/jakzal/toolbox/releases/download/v0.1.0/toolbox.phar -o /usr/local/bin/toolbox && chmod +x /usr/local/bin/toolbox \
+ && php /usr/local/bin/toolbox install \
  && rm -rf ~/.composer/cache \
  && apt-get purge -y --auto-remove $BUILD_DEPS
 
-CMD php /usr/local/bin/tools.php list
+CMD php /usr/local/bin/toolbox list-tools
